@@ -128,3 +128,4 @@ FinSys is a high-throughput payment processing system built with scalability, fa
 3. run database migrations
 4. start the application with `go run cmd/server/main.go`
 5. access the api at `localhost:8080`# finsys
+# finsys

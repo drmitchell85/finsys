@@ -3,6 +3,7 @@ package messenger
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -70,6 +71,9 @@ func initSQSClient(config config.Config) *sqs.SQS {
 	}
 
 	sqsClient := sqs.New(sess)
+
+	log.Println("connected to sqs")
+
 	return sqsClient
 }
 

@@ -83,7 +83,5 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("Unable to decode into struct, %v", err)
 	}
 
-	fmt.Printf("\nconfig: %+v\n", &config)
-
 	return &config, nil
 }
