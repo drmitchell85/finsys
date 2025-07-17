@@ -1,0 +1,30 @@
+app:
+  name: "Finsys Transaction Service"
+  
+server:
+  host: localhost
+  port: 8080
+
+database:
+  name: ''
+  host: localhost
+  port: 5432
+  user: ''
+  password: ''
+
+redis:
+  host: localhost
+  port: 6379
+
+sqs:
+  transactionQueue: "finsys-transactions-queue"
+  transactionDLQ: "finsys-transactions-deadletter-queue"
+  notificationQueue: "finsys-notifications-queue"
+  notificationDLQ: "finsys-notifications-deadletter-queue"
+  maxNumberOfMessages: 10
+  waitTimeSeconds: 20
+
+
+aws:
+  host: http://localhost:4566
+  region: us-east-2
