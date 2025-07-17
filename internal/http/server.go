@@ -43,10 +43,10 @@ func (s *Server) Shutdown(ctx context.Context) {
 	if err := s.db.Close(); err != nil {
 		log.Printf("error closing db connection: %v", err)
 	}
-
 }
 
 func NewServer() (*Server, error) {
+	ctx := context.Background()
 	server := Server{}
 
 	config, err := config.Load()
@@ -61,6 +61,12 @@ func NewServer() (*Server, error) {
 	}
 	server.db = db
 
+	rds, err := store.InitCache(ctx, *config)
+	if err != nil {
+		return nil, fmt.Errorf("error starting cache: %s", err)
+	}
+	server.redis = rds
+
 	queueService := messenger.NewQueueService(*config)
 	server.queueService = queueService
 
@@ -69,8 +75,6 @@ func NewServer() (*Server, error) {
 		return nil, fmt.Errorf("error starting http server: %s", err)
 	}
 	server.httpServer = httpServer
-
-	fmt.Printf("\nserver: %+v\n", server)
 
 	return &server, nil
 }

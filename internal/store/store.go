@@ -1,12 +1,14 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 
 	"github.com/drmitchell85/finsys/internal/config"
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 )
 
 func InitDB(config config.Config) (*sql.DB, error) {
@@ -27,4 +29,21 @@ func InitDB(config config.Config) (*sql.DB, error) {
 	log.Println("connected to db")
 
 	return db, nil
+}
+
+func InitCache(ctx context.Context, config config.Config) (*redis.Client, error) {
+	rds := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	_, err := rds.Ping(ctx).Result()
+	if err != nil {
+		return nil, fmt.Errorf("failed to init cache: %w", err)
+	}
+
+	log.Println("connected to cache")
+
+	return rds, nil
 }
