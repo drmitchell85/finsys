@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/drmitchell85/finsys/internal/config"
 	_ "github.com/lib/pq"
@@ -33,7 +34,7 @@ func InitDB(config config.Config) (*sql.DB, error) {
 
 func InitCache(ctx context.Context, config config.Config) (*redis.Client, error) {
 	rds := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     fmt.Sprintf("%s:%s", config.Redis.Host, strconv.Itoa(config.Redis.Port)),
 		Password: "",
 		DB:       0,
 	})

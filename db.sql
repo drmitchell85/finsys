@@ -1,5 +1,17 @@
+CREATE TYPE user_status AS ENUM ('active', 'suspended', 'deleted');
 CREATE TYPE transaction_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'cancelled');
 CREATE TYPE account_status AS ENUM ('active', 'suspended', 'closed', 'pending_verification');
+CREATE TYPE mock_account_status AS ENUM ('active', 'suspended', 'closed', 'pending_verification');
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    status user_status NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
 
 CREATE TABLE accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,6 +41,27 @@ CREATE TABLE transactions (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE mock_accounts (
+   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   balance DECIMAL(15,2) NOT NULL DEFAULT 0,
+   currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+   status mock_account_status NOT NULL DEFAULT 'active',
+   updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE mock_reservations (
+   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   account_id UUID NOT NULL REFERENCES mock_accounts(id),
+   amount DECIMAL(15,2) NOT NULL,
+   expires_at TIMESTAMP NOT NULL,
+   created_at TIMESTAMP DEFAULT NOW()
+);
+
 CREATE INDEX idx_transactions_from_account ON transactions(from_account_id);
 CREATE INDEX idx_transactions_status ON transactions(status);
 CREATE INDEX idx_transactions_created_at ON transactions(created_at);
+
+ALTER TABLE transactions ADD COLUMN bank_reservation_id UUID;
+
+ALTER TABLE accounts ADD CONSTRAINT fk_accounts_user_id 
+FOREIGN KEY (user_id) REFERENCES users(id);
