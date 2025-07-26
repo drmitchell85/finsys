@@ -12,3 +12,4 @@ terraform.tfvars.json
 
 # sensitive files
 .env
+db.sql

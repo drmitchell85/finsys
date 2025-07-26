@@ -7,10 +7,13 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
 
+	"github.com/drmitchell85/finsys/internal/bank"
 	"github.com/drmitchell85/finsys/internal/config"
 	"github.com/drmitchell85/finsys/internal/messenger"
 	"github.com/drmitchell85/finsys/internal/store"
+	"github.com/drmitchell85/finsys/internal/transaction"
 	"github.com/go-chi/chi"
 	"github.com/redis/go-redis/v9"
 )
@@ -54,7 +57,6 @@ func NewServer() (*Server, error) {
 		return nil, fmt.Errorf("error loading config: %s", err)
 	}
 
-	// TODO init db, redis, etc...
 	db, err := store.InitDB(*config)
 	if err != nil {
 		return nil, fmt.Errorf("error starting db: %s", err)
@@ -70,7 +72,7 @@ func NewServer() (*Server, error) {
 	queueService := messenger.NewQueueService(*config)
 	server.queueService = queueService
 
-	httpServer, err := initHttpServer(config)
+	httpServer, err := initHttpServer(config, &server, ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error starting http server: %s", err)
 	}
@@ -79,14 +81,18 @@ func NewServer() (*Server, error) {
 	return &server, nil
 }
 
-func initHttpServer(config *config.Config) (*http.Server, error) {
+func initHttpServer(config *config.Config, server *Server, ctx context.Context) (*http.Server, error) {
 	router := chi.NewRouter()
 	httpServer := &http.Server{
 		Addr:    ":" + fmt.Sprintf("%d", config.Server.Port),
 		Handler: router,
 	}
 
-	addRoutes(router)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	rs := store.NewRepositoryService(server.db, server.redis)
+	bs := bank.NewBankService(server.db)
+	ts := transaction.NewTransactionService(rs, server.queueService, bs, logger)
+	addRoutes(router, ts, ctx)
 
 	return httpServer, nil
 }
