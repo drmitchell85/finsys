@@ -34,7 +34,7 @@ func InitDB(config config.Config) (*sql.DB, error) {
 
 func InitCache(ctx context.Context, config config.Config) (*redis.Client, error) {
 	rds := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", config.Redis.Host, strconv.Itoa(config.Redis.Port)),
+    Addr:     fmt.Sprintf("%s:%s", config.Redis.Host, strconv.Itoa(config.Redis.Port)),
 		Password: "",
 		DB:       0,
 	})
