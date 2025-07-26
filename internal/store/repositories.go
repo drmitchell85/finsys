@@ -20,6 +20,7 @@ type RepositoryService interface {
 	GetIdempotencyCache(ctx context.Context, key string) (*models.IdempotencyCache, error)
 	GetTransactionByIdempotencyKey(ctx context.Context, idempKey string) (*models.Transaction, error)
 	CreateTransaction(ctx context.Context, tx *models.Transaction) (uuid.UUID, time.Time, error)
+	GetExternalBankAccountID(ctx context.Context, accountID uuid.UUID) (uuid.UUID, error)
 }
 
 type repositoryService struct {
@@ -147,4 +148,21 @@ func (rs *repositoryService) CreateTransaction(ctx context.Context, tx *models.T
 	tx.ID = transactionID
 	tx.CreatedAt = timestamp
 	return transactionID, timestamp, nil
+}
+
+func (rs *repositoryService) GetExternalBankAccountID(ctx context.Context, accountID uuid.UUID) (uuid.UUID, error) {
+	var externalID uuid.UUID
+
+	err := rs.db.QueryRowContext(ctx,
+		"SELECT external_bank_account_id FROM accounts WHERE id = $1",
+		accountID).Scan(&externalID)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return uuid.Nil, utils.NewNotFoundError("account not found", err)
+		}
+		return uuid.Nil, utils.NewInternalError(err)
+	}
+
+	return externalID, nil
 }

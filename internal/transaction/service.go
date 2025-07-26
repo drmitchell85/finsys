@@ -113,7 +113,12 @@ func (ts *transactionService) CreateTransaction(ctx context.Context, req models.
 		}
 	}
 
-	hasFunds, err := ts.bs.HasSufficientFunds(ctx, req.FromAccountID, req.Amount)
+	bankAccountID, err := ts.rs.GetExternalBankAccountID(ctx, req.FromAccountID)
+	if err != nil {
+		return nil, utils.WrapError(err, utils.ErrInternal, "failed to get external bank account")
+	}
+
+	hasFunds, err := ts.bs.HasSufficientFunds(ctx, bankAccountID, req.Amount)
 	if err != nil {
 		return nil, utils.WrapError(err, utils.ErrInternal, "failed to check account balance")
 	} else if !hasFunds {
@@ -125,7 +130,7 @@ func (ts *transactionService) CreateTransaction(ctx context.Context, req models.
 		return nil, utils.WrapError(err, utils.ErrValidation, "error while validating currency")
 	}
 
-	resID, err := ts.bs.ReserveFunds(ctx, req.FromAccountID, req.Amount)
+	resID, err := ts.bs.ReserveFunds(ctx, bankAccountID, req.Amount)
 	if err != nil {
 		return nil, utils.WrapError(err, utils.ErrValidation, "error reserving funds")
 	}

@@ -2,6 +2,7 @@ CREATE TYPE user_status AS ENUM ('active', 'suspended', 'deleted');
 CREATE TYPE transaction_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'cancelled');
 CREATE TYPE account_status AS ENUM ('active', 'suspended', 'closed', 'pending_verification');
 CREATE TYPE mock_account_status AS ENUM ('active', 'suspended', 'closed', 'pending_verification');
+CREATE TYPE account_type AS ENUM ('merchant', 'customer', 'platform');
 
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -65,3 +66,16 @@ ALTER TABLE transactions ADD COLUMN bank_reservation_id UUID;
 
 ALTER TABLE accounts ADD CONSTRAINT fk_accounts_user_id 
 FOREIGN KEY (user_id) REFERENCES users(id);
+
+ALTER TABLE accounts ALTER COLUMN account_type TYPE account_type USING account_type::account_type;
+
+ALTER TABLE accounts ALTER COLUMN external_bank_account_id TYPE UUID USING external_bank_account_id::UUID;
+
+ALTER TABLE accounts ADD CONSTRAINT fk_accounts_external_bank 
+FOREIGN KEY (external_bank_account_id) REFERENCES mock_accounts(id);
+
+ALTER TABLE transactions ADD CONSTRAINT fk_transactions_reservation 
+FOREIGN KEY (bank_reservation_id) REFERENCES mock_reservations(id);
+
+ALTER TABLE accounts DROP CONSTRAINT fk_accounts_external_bank;
+ALTER TABLE transactions DROP CONSTRAINT fk_transactions_reservation;
