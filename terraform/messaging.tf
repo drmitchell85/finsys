@@ -1,5 +1,7 @@
 resource "aws_sqs_queue" "transactions_queue" {
-  name                      = "finsys-transactions-queue"
+  name                      = "finsys-transactions-queue.fifo"
+  fifo_queue                = true
+  content_based_deduplication = true
   max_message_size          = 2048
   message_retention_seconds = 86400
   receive_wait_time_seconds = 10
@@ -14,7 +16,9 @@ resource "aws_sqs_queue" "transactions_queue" {
 }
 
 resource "aws_sqs_queue" "notifications_queue" {
-  name                      = "finsys-notifications-queue"
+  name                      = "finsys-notifications-queue.fifo"
+  fifo_queue                = true
+  content_based_deduplication = true
   max_message_size          = 2048
   message_retention_seconds = 86400
   receive_wait_time_seconds = 10
@@ -29,9 +33,13 @@ resource "aws_sqs_queue" "notifications_queue" {
 }
 
 resource "aws_sqs_queue" "transactions_queue_deadletter" {
-  name = "finsys-transactions-deadletter-queue"
+  name = "finsys-transactions-deadletter-queue.fifo"
+  fifo_queue = true
+  content_based_deduplication = true
 }
 
 resource "aws_sqs_queue" "notifications_queue_deadletter" {
-  name = "finsys-notifications-deadletter-queue"
+  name = "finsys-notifications-deadletter-queue.fifo"
+  fifo_queue = true
+  content_based_deduplication = true
 }

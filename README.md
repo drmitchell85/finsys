@@ -126,6 +126,20 @@ FinSys is a high-throughput payment processing system built with scalability, fa
 1. clone the repository
 2. set up local postgres and redis via docker-compose
 3. run database migrations
-4. start the application with `go run cmd/server/main.go`
-5. access the api at `localhost:8080`# finsys
+4. create the localstack sqs queues
+5. start the application with `make run-trans`
+6. access the api at `localhost:8080`# finsys
 # finsys
+
+### localstack sqs queues
+awslocal sqs create-queue --queue-name finsys-transactions-queue.fifo \
+    --attributes FifoQueue=true,ContentBasedDeduplication=true
+
+awslocal sqs create-queue --queue-name finsys-transactions-deadletter-queue.fifo \
+    --attributes FifoQueue=true,ContentBasedDeduplication=true
+
+awslocal sqs create-queue --queue-name finsys-notifications-queue.fifo \
+    --attributes FifoQueue=true,ContentBasedDeduplication=true
+
+awslocal sqs create-queue --queue-name finsys-notifications-deadletter-queue.fifo \
+    --attributes FifoQueue=true,ContentBasedDeduplication=true
